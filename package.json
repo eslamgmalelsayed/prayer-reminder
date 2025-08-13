@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vite build",
+    "build:check": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",
-    "ionic:build": "vue-tsc && vite build",
+    "ionic:build": "vite build",
     "ionic:serve": "vite",
-    "android": "ionic capacitor build android",
-    "build:android": "npm run build && ionic capacitor build android"
+    "android": "npm run build && npx cap sync && npx cap open android",
+    "build:android": "npm run build && npx cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^5.0.0",
@@ -20,12 +21,11 @@
     "@capacitor/keyboard": "^5.0.0",
     "@capacitor/local-notifications": "^5.0.0",
     "@capacitor/status-bar": "^5.0.0",
-    "@ionic/vue": "^7.0.0",
-    "@ionic/vue-router": "^7.0.0",
+    "@ionic/vue": "^8.7.2",
     "axios": "^1.4.0",
     "ionicons": "^7.0.0",
     "vue": "^3.3.0",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^5.0.0",

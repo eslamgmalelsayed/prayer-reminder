@@ -1,6 +1,7 @@
 # Prayer Reminder App
 
 A beautiful prayer time reminder app built with Ionic Vue.js featuring:
+
 - Real-time prayer times based on your location
 - Countdown timer to next prayer
 - Local notifications for prayer times
@@ -27,21 +28,25 @@ Before running this project, you need to update your Node.js to a supported vers
 ## Setup Instructions
 
 1. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Install Ionic CLI** (if not already installed):
+
    ```bash
    npm install -g @ionic/cli
    ```
 
 3. **Install Capacitor CLI**:
+
    ```bash
    npm install -g @capacitor/cli
    ```
 
 4. **Initialize Capacitor**:
+
    ```bash
    npx cap init
    ```
@@ -54,6 +59,7 @@ Before running this project, you need to update your Node.js to a supported vers
 ## Development
 
 Run the app in development mode:
+
 ```bash
 npm run dev
 ```
@@ -63,16 +69,19 @@ The app will open at `http://localhost:8100`
 ## Building for Production
 
 1. **Build the web app**:
+
    ```bash
    npm run build
    ```
 
 2. **Sync with Capacitor**:
+
    ```bash
    npx cap sync
    ```
 
 3. **Open in Android Studio**:
+
    ```bash
    npx cap open android
    ```
@@ -84,6 +93,7 @@ The app will open at `http://localhost:8100`
 ## Quick APK Build Command
 
 For a quick build:
+
 ```bash
 npm run build:android
 ```
