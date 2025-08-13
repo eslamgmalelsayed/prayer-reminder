@@ -1,10 +1,6 @@
 <template>
   <ion-page>
-    <ion-header
-      :translucent="true"
-      class="fade-header"
-      :class="{ 'header-faded': isScrolled }"
-    >
+    <ion-header :translucent="true">
       <ion-toolbar color="success">
         <ion-title class="fancy-title">
           <ion-icon :icon="moonOutline" class="logo-icon"></ion-icon>
@@ -13,12 +9,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content
-      :fullscreen="true"
-      class="ion-padding"
-      @ionScroll="onScroll"
-      :scroll-events="true"
-    >
+    <ion-content :fullscreen="true" class="ion-padding">
       <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
         <ion-refresher-content
           pulling-icon="chevron-down-circle-outline"
@@ -130,7 +121,6 @@ const currentDate = ref("");
 const prayerTimes = ref<PrayerTime[]>([]);
 const nextPrayer = ref<PrayerTime | null>(null);
 const timeUntilNext = ref("");
-const isScrolled = ref(false);
 let countdownInterval: NodeJS.Timeout | null = null;
 
 // Initialize date
@@ -328,13 +318,6 @@ const handleRefresh = async (event: CustomEvent) => {
   event.detail.complete();
 };
 
-// Handle scroll event for header fading
-const onScroll = (event: CustomEvent) => {
-  const scrollTop = event.detail.scrollTop;
-  // More responsive scroll threshold and smoother transitions
-  isScrolled.value = scrollTop > 20;
-};
-
 // Lifecycle hooks
 onMounted(async () => {
   updateCurrentDate();
@@ -355,14 +338,14 @@ onUnmounted(() => {
 .fade-header {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(0px);
-  background: rgba(72, 194, 105, 1);
+  background: rgba(109, 217, 138, 0.9);
   transform: translateY(0);
 }
 
 .header-faded {
-  opacity: 0.92;
+  opacity: 0.88;
   backdrop-filter: blur(15px);
-  background: rgba(72, 194, 105, 0.85);
+  background: rgba(109, 217, 138, 0.75);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 

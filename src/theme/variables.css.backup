@@ -1,4 +1,10 @@
-/* Ionic Variables and Theming. For more info, please see:
+/* Ionic Variables and Themin  /** success **/
+  --ion-color-success: rgba(109, 217, 138, 0.5);
+  --ion-color-success-rgb: 109, 217, 138;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: rgba(96, 192, 121, 0.5);
+  --ion-color-success-tint: rgba(124, 221, 150, 0.5);more info, please see:
 http://ionicframework.com/docs/theming/ */
 
 /** Ionic CSS Variables **/
@@ -28,14 +34,12 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-tertiary-tint: #6370ff;
 
   /** success **/
-  --ion-color-success: rgba(109, 217, 138, 0.8);
+  --ion-color-success: rgba(109, 217, 138, 0.5);
   --ion-color-success-rgb: 109, 217, 138;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: rgba(96, 192, 121, 0.8);
-  --ion-color-success-tint: rgba(124, 221, 150, 0.8);
-  --ion-color-success-shade: rgba(96, 192, 121, 0.8);
-  --ion-color-success-tint: rgba(124, 221, 150, 0.8);
+  --ion-color-success-shade: rgba(96, 192, 121, 0.5);
+  --ion-color-success-tint: rgba(124, 221, 150, 0.5);
 
   /** warning **/
   --ion-color-warning: #ffc409;
