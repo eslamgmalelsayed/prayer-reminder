@@ -3,7 +3,20 @@
     <ion-header :translucent="true">
       <ion-toolbar color="success">
         <ion-title class="fancy-title">
-          <ion-icon :icon="moonOutline" class="logo-icon"></ion-icon>
+          <!-- Replace this line in both header and condense header -->
+          <!-- <ion-icon :icon="moonOutline" class="logo-icon"></ion-icon> -->
+          <span
+            class="logo-icon"
+            style="display: inline-block; vertical-align: middle"
+          >
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path
+                d="M16 4a12 12 0 1 0 0 24c-5.523 0-10-4.477-10-10S10.477 4 16 4z"
+                fill="#48c269"
+              />
+              <path d="M22 10.5l1.5 4.5h-3l1.5-4.5z" fill="#fff" />
+            </svg>
+          </span>
           <span class="title-text">Prayer Times</span>
         </ion-title>
       </ion-toolbar>
@@ -17,13 +30,27 @@
           refreshing-spinner="circles"
           refreshing-text="Refreshing prayer times..."
         >
+          <div class="circle-loader"></div>
         </ion-refresher-content>
       </ion-refresher>
 
       <ion-header collapse="condense">
         <ion-toolbar color="success">
           <ion-title size="large" class="fancy-title large">
-            <ion-icon :icon="moonOutline" class="logo-icon large"></ion-icon>
+            <!-- Replace this line in both header and condense header -->
+            <!-- <ion-icon :icon="moonOutline" class="logo-icon"></ion-icon> -->
+            <span
+              class="logo-icon"
+              style="display: inline-block; vertical-align: middle"
+            >
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path
+                  d="M16 4a12 12 0 1 0 0 24c-5.523 0-10-4.477-10-10S10.477 4 16 4z"
+                  fill="#48c269"
+                />
+                <path d="M22 10.5l1.5 4.5h-3l1.5-4.5z" fill="#fff" />
+              </svg>
+            </span>
             <span class="title-text">Prayer Times</span>
           </ion-title>
         </ion-toolbar>
@@ -53,7 +80,9 @@
           <ion-card-content>
             <div class="countdown-container">
               <h1 class="countdown-timer">{{ timeUntilNext }}</h1>
-              <p class="next-prayer-time">at {{ nextPrayer.time }}</p>
+              <p class="next-prayer-time">
+                at {{ formatTime(nextPrayer.time) }}
+              </p>
             </div>
           </ion-card-content>
         </ion-card>
@@ -70,7 +99,7 @@
             >
               <ion-label>
                 <h2>{{ prayer.name }}</h2>
-                <p>{{ prayer.time }}</p>
+                <p>{{ formatTime(prayer.time) }}</p>
               </ion-label>
               <ion-icon
                 v-if="prayer.name === nextPrayer?.name"
@@ -87,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import {
   IonContent,
   IonHeader,
@@ -106,9 +135,13 @@ import {
   IonRefresherContent,
   toastController,
 } from "@ionic/vue";
-import { timeOutline, moonOutline } from "ionicons/icons";
+import { timeOutline, star } from "ionicons/icons";
 import axios from "axios";
-import { LocalNotifications } from "@capacitor/local-notifications";
+import {
+  LocalNotifications,
+  type PendingLocalNotificationSchema,
+} from "@capacitor/local-notifications";
+import { Geolocation } from "@capacitor/geolocation";
 
 interface PrayerTime {
   name: string;
@@ -120,6 +153,32 @@ const currentLocation = ref("Loading...");
 const currentDate = ref("");
 const prayerTimes = ref<PrayerTime[]>([]);
 const nextPrayer = ref<PrayerTime | null>(null);
+
+function formatTime(time: string): string {
+  if (!time) return "";
+  let [h, m] = time.split(":").map(Number);
+  // Clamp minutes to 59 if invalid
+  if (m >= 60) m = 59;
+  const date = new Date();
+  date.setHours(h, m, 0, 0);
+  // Always use 12-hour format with AM/PM
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+const formattedPrayerTimes = computed(() =>
+  prayerTimes.value.map((prayer) => ({
+    ...prayer,
+    formattedTime: formatTime(prayer.time),
+  }))
+);
+
+const formattedNextPrayerTime = computed(() =>
+  nextPrayer.value ? formatTime(nextPrayer.value.time) : ""
+);
 const timeUntilNext = ref("");
 let countdownInterval: NodeJS.Timeout | null = null;
 
@@ -137,20 +196,41 @@ const updateCurrentDate = () => {
 // Get user location
 const getUserLocation = async () => {
   try {
+    // Try native GPS first via Capacitor (prompts for permission on Android 6+)
+    try {
+      const perm = await Geolocation.requestPermissions();
+      if (
+        (perm as any).location === "granted" ||
+        (perm as any).coarseLocation === "granted"
+      ) {
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+        const { latitude, longitude } = position.coords;
+        currentLocation.value = "Getting location...";
+        await fetchPrayerTimes(latitude, longitude);
+        return;
+      }
+    } catch {
+      // ignore and fall back
+    }
+
+    // Fallback to browser geolocation
     if ("geolocation" in navigator) {
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+          });
         }
       );
-
       const { latitude, longitude } = position.coords;
       currentLocation.value = "Getting location...";
-
-      // Fetch prayer times which will also set the location from timezone
       await fetchPrayerTimes(latitude, longitude);
     } else {
-      // No geolocation support - use IP-based location
+      // Final fallback - IP-based location
       await getLocationByIP();
     }
   } catch (error) {
@@ -273,17 +353,38 @@ const updateCountdown = () => {
 // Schedule notifications
 const scheduleNotifications = async () => {
   try {
-    await LocalNotifications.requestPermissions();
+    const perm = await LocalNotifications.requestPermissions();
+    if (perm.display !== "granted") {
+      await showToast("Please allow notifications for prayer alerts");
+      return;
+    }
+
+    // Create a channel on Android for prayer reminders (default sound)
+    try {
+      // @ts-ignore - createChannel exists on Android
+      await LocalNotifications.createChannel?.({
+        id: "prayers",
+        name: "Prayer Times",
+        description: "Prayer reminders",
+        importance: 5,
+        // no custom sound -> uses device default
+        vibration: true,
+        lights: true,
+        visibility: 1,
+      });
+    } catch {}
+
     await LocalNotifications.cancel({ notifications: [] });
 
-    const notifications = prayerTimes.value
+    const notifications: PendingLocalNotificationSchema[] = prayerTimes.value
       .filter((prayer) => prayer.name !== "Sunrise") // Exclude sunrise
       .map((prayer, index) => ({
         title: `Time for ${prayer.name} Prayer`,
         body: `It's time for ${prayer.name} prayer at ${prayer.time}`,
         id: index + 1,
         schedule: { at: new Date(prayer.timestamp) },
-        sound: "default",
+        channelId: "prayers",
+        // omit sound to use system default
         attachments: [],
         actionTypeId: "",
         extra: null,
@@ -332,6 +433,9 @@ onUnmounted(() => {
     clearInterval(countdownInterval);
   }
 });
+
+// Expose formatTime for parent access (if needed)
+defineExpose({ formatTime });
 </script>
 
 <style scoped>
@@ -446,5 +550,28 @@ onUnmounted(() => {
 .current-prayer {
   --background: var(--ion-color-success-tint);
   --color: var(--ion-color-success-contrast);
+}
+
+.circle-loader {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0ffe0;
+  border-top: 4px solid #48c269;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

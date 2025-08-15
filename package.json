@@ -11,9 +11,12 @@
     "ionic:build": "vite build",
     "ionic:serve": "vite",
     "android": "npm run build && npx cap sync && npx cap open android",
-    "build:android": "npm run build && npx cap sync"
+    "build:android": "npm run build && npx cap sync",
+    "apk:debug": "npm run build && npx cap sync android && .\\android\\gradlew.bat :app:assembleDebug",
+    "apk:release": "npm run build && npx cap sync android && .\\android\\gradlew.bat :app:assembleRelease"
   },
   "dependencies": {
+    "@capacitor/geolocation": "^7.1.5",
     "@capacitor/android": "^7.4.2",
     "@capacitor/app": "7.0.2",
     "@capacitor/core": "7.4.2",
